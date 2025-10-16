@@ -1,6 +1,6 @@
 export const Footer = () => {
   return (
-    <footer className="w-full bg-indigo-600 text-white py-4 mt-10 shadow-inner">
+    <footer className="w-full bg-indigo-600 text-white py-4 shadow-inner">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between px-6 gap-2 text-sm">
         {/* Left side */}
         <p className="text-center md:text-left">
