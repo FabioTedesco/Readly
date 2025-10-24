@@ -25,6 +25,7 @@ type State = {
 type Action =
   | { type: "ADD"; shelf: Shelf; book: Book }
   | { type: "SET_RATING"; personalRating: number; book: Book }
+  | { type: "SET_NOTES"; notes: string; book: Book }
   | { type: "REMOVE"; shelf: Shelf; key: string }
   | { type: "TOGGLE"; shelf: Shelf }
   | { type: "RESET" };
@@ -39,6 +40,7 @@ type BooksContextValue = {
   remove: (shelf: Shelf, key: string) => void;
   handleToggle: (shelf: Shelf) => void;
   addRating: (personaRating: number, book: Book) => void;
+  addNotes: (notes: string, book: Book) => void;
 
   isInWishlist: (key: string) => boolean;
   isInRead: (key: string) => boolean;
@@ -53,6 +55,7 @@ type PersistedState = {
   shelves: ShelvesIndex;
   toggleShelf?: Shelf;
   personalRating?: number;
+  notes?: string;
 };
 
 const initState: State = {
@@ -92,6 +95,21 @@ function reducer(state: State, action: Action): State {
           [book.key]: {
             ...state.booksByKey[book.key],
             personalRating,
+          },
+        },
+      };
+    }
+
+    case "SET_NOTES": {
+      const { notes, book } = action;
+
+      return {
+        ...state,
+        booksByKey: {
+          ...state.booksByKey,
+          [book.key]: {
+            ...state.booksByKey[book.key],
+            notes,
           },
         },
       };
@@ -165,6 +183,9 @@ export function BooksProvider({ children }: { children: ReactNode }) {
   const addRating = (personalRating: number, book: Book) => {
     dispatch({ type: "SET_RATING", personalRating, book });
   };
+  const addNotes = (notes: string, book: Book) => {
+    dispatch({ type: "SET_NOTES", notes, book });
+  };
   const remove = (shelf: Shelf, key: string) => {
     dispatch({ type: "REMOVE", shelf, key });
   };
@@ -213,6 +234,7 @@ export function BooksProvider({ children }: { children: ReactNode }) {
     toggleShelf,
     add,
     addRating,
+    addNotes,
     remove,
     handleToggle,
     reset,

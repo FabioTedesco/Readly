@@ -1,99 +1,134 @@
 import type { Book } from "@/types/book";
 import { useBooks } from "@/context/BooksContext";
+import RatingStars from "./RatingStars";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
-import RatingStars from "./RatingStars";
 
-export default function BooksTable() {
-  const { read, wishlist, toggleShelf, remove } = useBooks();
-  const chooseShelf = toggleShelf === "read" ? read : wishlist;
+export default function BooksList() {
+  const { read, wishlist, toggleShelf, remove, addNotes } = useBooks();
+
+  const books = toggleShelf === "read" ? read : wishlist;
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full border border-gray-200 bg-white rounded-lg shadow-sm">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="px-4 py-2 text-sm font-semibold text-gray-600">
-              Cover
-            </th>
-            <th className="px-4 py-2 text-sm font-semibold text-gray-600">
-              Title
-            </th>
-            <th className="px-4 py-2 text-sm font-semibold text-gray-600">
-              Author
-            </th>
-            {toggleShelf === "read" && (
-              <>
-                <th className="px-4 py-2 text-sm font-semibold text-gray-600">
-                  Rating ⭐
-                </th>
-                <th className="px-4 py-2 text-sm font-semibold text-gray-600">
-                  Notes 📝
-                </th>
-              </>
-            )}
-
-            <th className="px-4 py-2 text-sm font-semibold text-gray-600">
-              Actions
-            </th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {chooseShelf.length === 0 ? (
-            <tr>
-              <td colSpan={5} className="text-center py-4 text-gray-400 italic">
-                No books found.
-              </td>
-            </tr>
-          ) : (
-            chooseShelf.map((book: Book) => (
-              <tr
-                key={book.key}
-                className="border-t border-gray-100 hover:bg-gray-50 transition"
-              >
-                <td className="px-4 py-2">
-                  <img
-                    src={
-                      book.coverId
-                        ? `https://covers.openlibrary.org/b/id/${book.coverId}-S.jpg`
-                        : "no img"
-                    }
-                    alt={book.title}
-                    className="w-12 h-16 object-cover rounded-md shadow-sm"
-                  />
-                </td>
-
-                <td className="px-4 py-2 text-sm font-medium text-gray-800">
-                  {book.title}
-                </td>
-
-                <td className="px-4 py-2 text-sm text-gray-600">
-                  {book.author || "Unknown"}
-                </td>
-
-                {toggleShelf === "read" && (
-                  <>
-                    <td className="px-4 py-2 text-sm text-gray-600">
-                      <RatingStars book={book} />
-                    </td>
-                    <td className="px-4 py-2 text-sm text-gray-600">
-                      {/* {book.notes || "—"} */}
-                      <input type="text" placeholder="inserisci note" />
-                    </td>
-                  </>
-                )}
-
-                <td className="px-4 py-2 text-sm text-gray-600">
-                  <div onClick={() => remove(toggleShelf, book.key)}>
-                    <FontAwesomeIcon icon={faTrash} />
-                  </div>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+    <div className="space-y-4">
+      {books.length === 0 ? (
+        <div className="text-center text-gray-400 italic py-8 border border-dashed rounded-xl">
+          No books here yet 📚
+        </div>
+      ) : (
+        books.map((book: Book) => (
+          <BookCard
+            key={book.key}
+            book={book}
+            isRead={toggleShelf === "read"}
+            onRemove={() => remove(toggleShelf, book.key)}
+            onNoteChange={(val) => addNotes(val, book)}
+          />
+        ))
+      )}
     </div>
+  );
+}
+
+function BookCard({
+  book,
+  isRead,
+  onRemove,
+  onNoteChange,
+}: {
+  book: Book;
+  isRead: boolean;
+  onRemove: () => void;
+  onNoteChange: (notes: string) => void;
+}) {
+  return (
+    <div className="relative flex flex-col md:flex-row gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow">
+      {/* Pulsante rimuovi in alto a destra */}
+      <button
+        onClick={onRemove}
+        className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition"
+        aria-label="Remove book"
+      >
+        <FontAwesomeIcon icon={faTrash} />
+      </button>
+
+      {/* Cover */}
+      <div className="flex-shrink-0 self-start">
+        <img
+          src={
+            book.coverId
+              ? `https://covers.openlibrary.org/b/id/${book.coverId}-M.jpg`
+              : "no img"
+          }
+          alt={book.title}
+          className="w-24 h-32 object-cover rounded-md shadow-sm bg-gray-100 flex items-center justify-center text-[10px] text-gray-400"
+        />
+      </div>
+
+      {/* Contenuto testuale */}
+      <div className="flex-1 flex flex-col gap-3">
+        {/* Titolo + autore */}
+        <div>
+          <div className="text-base font-semibold text-gray-800 flex flex-wrap items-start gap-2 pr-8">
+            <span>{book.title}</span>
+            {book.author && (
+              <span className="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md">
+                {book.author}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Rating utente (solo se è nella shelf "read") */}
+        {isRead && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+              Your rating
+            </span>
+            <RatingStars book={book} />
+            <span className="text-xs text-gray-500">
+              {book.personalRating ?? 0}/5
+            </span>
+          </div>
+        )}
+
+        {/* Note personali (solo se è nella shelf "read") */}
+        {isRead && (
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+              Notes
+            </label>
+            <textarea
+              className="w-full rounded-lg border border-gray-300 bg-gray-50 p-2 text-sm text-gray-700 shadow-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 min-h-[70px] resize-none"
+              placeholder="Cosa ti è rimasto di questo libro? 🤔"
+              defaultValue={book.notes ?? ""}
+              onChange={(e) => onNoteChange(e.target.value)}
+            />
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center gap-2 text-[11px] text-gray-500">
+          <StatusBadge isRead={isRead} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatusBadge({ isRead }: { isRead: boolean }) {
+  if (isRead) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-md bg-green-100 text-green-700 px-2 py-0.5 font-medium">
+        <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500" />
+        Read
+      </span>
+    );
+  }
+
+  return (
+    <span className="inline-flex items-center gap-1 rounded-md bg-yellow-100 text-yellow-700 px-2 py-0.5 font-medium">
+      <span className="inline-block w-1.5 h-1.5 rounded-full bg-yellow-500" />
+      Wishlist
+    </span>
   );
 }

@@ -34,9 +34,6 @@ const Card = ({ book }: Props) => {
         <p className="text-sm text-gray-500 mt-1">
           {book.author || "Unknown Author"}
         </p>
-        {book.firstPublishYear && (
-          <p className="text-xs text-gray-400 mt-1">{book.firstPublishYear}</p>
-        )}
       </div>
       {/* Pulsanti */}
       {isRead ? (
