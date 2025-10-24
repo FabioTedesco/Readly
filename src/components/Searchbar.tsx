@@ -1,11 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 export default function SearchBar({
   onSearch,
 }: {
   onSearch: (q: string) => void;
 }) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [q, setQ] = useState("");
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -25,6 +32,7 @@ export default function SearchBar({
         className="flex-1 border rounded-lg px-3 py-2"
         placeholder="Cerca titolo, autore, ISBN…"
         value={q}
+        ref={inputRef}
         onChange={(e) => setQ(e.target.value)}
       />
       <button

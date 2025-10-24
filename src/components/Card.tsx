@@ -6,7 +6,10 @@ type Props = {
 };
 
 const Card = ({ book }: Props) => {
-  const { add } = useBooks();
+  const { add, isInRead, isInWishlist } = useBooks();
+
+  const isRead = isInRead(book.key);
+  const isWhishlist = isInWishlist(book.key);
 
   // Costruisci URL della copertina
   const coverUrl = book.coverId
@@ -23,7 +26,6 @@ const Card = ({ book }: Props) => {
           className="w-32 h-44 object-cover rounded-md"
         />
       </div>
-
       {/* Testo */}
       <div className="mt-3 flex-1 text-center">
         <h3 className="text-md font-semibold text-gray-800 line-clamp-2">
@@ -36,20 +38,27 @@ const Card = ({ book }: Props) => {
           <p className="text-xs text-gray-400 mt-1">{book.firstPublishYear}</p>
         )}
       </div>
-
       {/* Pulsanti */}
-      <button
-        onClick={() => add("wishlist", book)}
-        className="mt-3 w-full bg-indigo-600 hover:bg-indigo-500 text-white py-1.5 rounded-lg text-sm font-medium transition"
-      >
-        Add to Wishlist
-      </button>
-      <button
-        onClick={() => add("read", book)}
-        className="mt-3 w-full bg-indigo-600 hover:bg-indigo-500 text-white py-1.5 rounded-lg text-sm font-medium transition"
-      >
-        Add to My Books
-      </button>
+      {isRead ? (
+        <p>gia letto</p>
+      ) : isWhishlist ? (
+        <p>in wishlist</p>
+      ) : (
+        <>
+          <button
+            onClick={() => add("wishlist", book)}
+            className="mt-3 w-full bg-indigo-600 hover:bg-indigo-500 text-white py-1.5 rounded-lg text-sm font-medium transition"
+          >
+            Add to Wishlist
+          </button>
+          <button
+            onClick={() => add("read", book)}
+            className="mt-3 w-full bg-indigo-600 hover:bg-indigo-500 text-white py-1.5 rounded-lg text-sm font-medium transition"
+          >
+            Add to My Books
+          </button>
+        </>
+      )}
     </div>
   );
 };

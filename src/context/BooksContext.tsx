@@ -6,6 +6,7 @@ import {
   useState,
   useEffect,
   type ReactNode,
+  useReducer,
 } from "react";
 
 type Shelf = "read" | "wishlist";
@@ -14,6 +15,18 @@ type ShelvesIndex = {
   read: Record<string, true>;
   wishlist: Record<string, true>;
 };
+
+type State = {
+  booksByKey: Record<string, Book>;
+  shelves: ShelvesIndex;
+  toggleShelf: Shelf;
+};
+
+type Action =
+  | { type: "ADD"; shelf: Shelf; book: Book }
+  | { type: "REMOVE"; shelf: Shelf; key: string }
+  | { type: "TOGGLE"; shelf: Shelf }
+  | { type: "RESET" };
 
 type BooksContextValue = {
   read: Book[];
@@ -25,109 +38,165 @@ type BooksContextValue = {
   remove: (shelf: Shelf, key: string) => void;
   handleToggle: (shelf: Shelf) => void;
 
-  isInWishlist: (shelf: Shelf, book: Book[]) => boolean;
-  isInRead: (shelf: Shelf, book: Book[]) => boolean;
+  isInWishlist: (key: string) => boolean;
+  isInRead: (key: string) => boolean;
 
   reset: () => void;
 };
 
-const STORAGE_KEY = "readly-state";
+const STORAGE_KEY = "readly-state-v1";
 
 type PersistedState = {
   booksByKey: Record<string, Book>;
   shelves: ShelvesIndex;
+  toggleShelf?: Shelf;
 };
+
+const initState: State = {
+  booksByKey: {},
+  shelves: { wishlist: {}, read: {} },
+  toggleShelf: "read",
+};
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "ADD": {
+      const { shelf, book } = action;
+
+      const booksByKey = state.booksByKey[book.key]
+        ? state.booksByKey
+        : { ...state.booksByKey, [book.key]: book };
+
+      if (state.shelves[shelf][book.key]) {
+        return { ...state, booksByKey };
+      }
+
+      const shelves: ShelvesIndex = {
+        ...state.shelves,
+        [shelf]: { ...state.shelves[shelf], [book.key]: true },
+      };
+
+      return { ...state, booksByKey, shelves };
+    }
+
+    case "REMOVE": {
+      const { shelf, key } = action;
+
+      if (!state.shelves[shelf][key]) return state;
+
+      const { [key]: _, ...rest } = state.shelves[shelf];
+      const nextShelves: ShelvesIndex = { ...state.shelves, [shelf]: rest };
+
+      const isStillUSed = !!(
+        nextShelves.read[key] || nextShelves.wishlist[key]
+      );
+
+      const nextBooksByKey = isStillUSed
+        ? state.booksByKey
+        : (() => {
+            const { [key]: _, ...restBooks } = state.booksByKey;
+            return restBooks;
+          })();
+
+      return { ...state, shelves: nextShelves, booksByKey: nextBooksByKey };
+    }
+
+    case "TOGGLE": {
+      return { ...state, toggleShelf: action.shelf };
+    }
+
+    case "RESET": {
+      return initState;
+    }
+
+    default:
+      return state;
+  }
+}
+
+function initFromStorage(): State {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return initState;
+
+    const persisted = JSON.parse(raw) as PersistedState;
+
+    return {
+      booksByKey: persisted.booksByKey ?? {},
+      shelves: persisted.shelves ?? { wishlist: {}, read: {} },
+      toggleShelf: persisted.toggleShelf ?? "read",
+    };
+  } catch (error) {
+    console.error(error);
+    return initState;
+  }
+}
 
 const BooksContext = createContext<BooksContextValue | undefined>(undefined);
 
 export function BooksProvider({ children }: { children: ReactNode }) {
-  const [booksByKey, setBooksByKey] = useState<Record<string, Book>>(() => {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as PersistedState).booksByKey : {};
-  });
-  const [shelves, setShelves] = useState<ShelvesIndex>(() => {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw
-      ? (JSON.parse(raw) as PersistedState).shelves
-      : { wishlist: {}, read: {} };
-  });
-  const [toggleShelf, setToggleShelf] = useState<Shelf>("read");
-
-  // --- persistenza
-  useEffect(() => {
-    const snapshot: PersistedState = { booksByKey, shelves };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
-  }, [booksByKey, shelves]);
+  const [state, dispatch] = useReducer(
+    reducer,
+    undefined as unknown as State,
+    initFromStorage
+  );
 
   const add = (shelf: Shelf, book: Book) => {
-    setBooksByKey((prev) =>
-      prev[book.key] ? prev : { ...prev, [book.key]: book }
-    );
-    setShelves((prev) => {
-      if (prev[shelf][book.key]) return prev;
-      return { ...prev, [shelf]: { ...prev[shelf], [book.key]: true } };
-    });
-
-    console.log(shelves, booksByKey);
+    dispatch({ type: "ADD", shelf, book });
   };
-
   const remove = (shelf: Shelf, key: string) => {
-    setShelves((prev) => {
-      if (!prev[shelf][key]) return prev;
-      const { [key]: _, ...rest } = prev[shelf];
-      const next = { ...prev, [shelf]: rest };
-
-      const stillUSed = (s: ShelvesIndex) => !!(s.read[key] || s.wishlist[key]);
-      if (!stillUSed(next)) {
-        setBooksByKey((b) => {
-          const { [key]: _, ...restBooks } = b;
-          return restBooks;
-        });
-      }
-      return next;
-    });
+    dispatch({ type: "REMOVE", shelf, key });
   };
-
   const handleToggle = (shelf: Shelf) => {
-    setToggleShelf(shelf);
+    dispatch({ type: "TOGGLE", shelf });
   };
-
   const reset = () => {
-    setBooksByKey({});
-    setShelves({ read: {}, wishlist: {} });
+    localStorage.removeItem(STORAGE_KEY);
+    dispatch({ type: "RESET" });
   };
 
-  const isInShelf = (shelf: Shelf, key: string) => !!shelves[shelf][key];
+  const isInShelf = (shelf: Shelf, key: string) => !!state.shelves[shelf][key];
   const isInRead = (key: string) => isInShelf("read", key);
   const isInWishlist = (key: string) => isInShelf("wishlist", key);
 
-  //trasforma oggetti in array per mostrarli:
+  useEffect(() => {
+    const snapshot: PersistedState = {
+      booksByKey: state.booksByKey,
+      shelves: state.shelves,
+      toggleShelf: state.toggleShelf,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
+  }, [state.booksByKey, state.shelves, state.toggleShelf]);
 
+  //trasforma oggetti in array per mostrarli:
   const read = useMemo(
     () =>
-      Object.keys(shelves.read)
-        .map((k) => booksByKey[k])
+      Object.keys(state.shelves.read)
+        .map((k) => state.booksByKey[k])
         .filter(Boolean),
-    [shelves.read, booksByKey]
+    [state.shelves.read, state.booksByKey]
   );
   const wishlist = useMemo(
     () =>
-      Object.keys(shelves.wishlist)
-        .map((k) => booksByKey[k])
+      Object.keys(state.shelves.wishlist)
+        .map((k) => state.booksByKey[k])
         .filter(Boolean),
-    [shelves.wishlist, booksByKey]
+    [state.shelves.wishlist, state.booksByKey]
   );
 
+  const toggleShelf = state.toggleShelf;
+
   const value: BooksContextValue = {
-    wishlist,
     read,
+    wishlist,
     toggleShelf,
     add,
     remove,
     handleToggle,
-    isInWishlist,
-    isInRead,
     reset,
+
+    isInRead,
+    isInWishlist,
   };
 
   return (
