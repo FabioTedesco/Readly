@@ -2,6 +2,7 @@ import type { Book } from "@/types/book";
 import { useBooks } from "@/context/BooksContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import RatingStars from "./RatingStars";
 
 export default function BooksTable() {
   const { read, wishlist, toggleShelf, remove } = useBooks();
@@ -21,12 +22,17 @@ export default function BooksTable() {
             <th className="px-4 py-2 text-sm font-semibold text-gray-600">
               Author
             </th>
-            <th className="px-4 py-2 text-sm font-semibold text-gray-600">
-              Rating ⭐
-            </th>
-            <th className="px-4 py-2 text-sm font-semibold text-gray-600">
-              Notes 📝
-            </th>
+            {toggleShelf === "read" && (
+              <>
+                <th className="px-4 py-2 text-sm font-semibold text-gray-600">
+                  Rating ⭐
+                </th>
+                <th className="px-4 py-2 text-sm font-semibold text-gray-600">
+                  Notes 📝
+                </th>
+              </>
+            )}
+
             <th className="px-4 py-2 text-sm font-semibold text-gray-600">
               Actions
             </th>
@@ -34,48 +40,52 @@ export default function BooksTable() {
         </thead>
 
         <tbody>
-          {wishlist.length === 0 ? (
+          {chooseShelf.length === 0 ? (
             <tr>
               <td colSpan={5} className="text-center py-4 text-gray-400 italic">
                 No books found.
               </td>
             </tr>
           ) : (
-            chooseShelf.map((chooseShelf: Book) => (
+            chooseShelf.map((book: Book) => (
               <tr
-                key={chooseShelf.key}
+                key={book.key}
                 className="border-t border-gray-100 hover:bg-gray-50 transition"
               >
                 <td className="px-4 py-2">
                   <img
                     src={
-                      chooseShelf.coverId
-                        ? `https://covers.openlibrary.org/b/id/${chooseShelf.coverId}-S.jpg`
+                      book.coverId
+                        ? `https://covers.openlibrary.org/b/id/${book.coverId}-S.jpg`
                         : "no img"
                     }
-                    alt={chooseShelf.title}
+                    alt={book.title}
                     className="w-12 h-16 object-cover rounded-md shadow-sm"
                   />
                 </td>
 
                 <td className="px-4 py-2 text-sm font-medium text-gray-800">
-                  {chooseShelf.title}
+                  {book.title}
                 </td>
 
                 <td className="px-4 py-2 text-sm text-gray-600">
-                  {chooseShelf.author || "Unknown"}
+                  {book.author || "Unknown"}
                 </td>
 
-                <td className="px-4 py-2 text-sm text-gray-600">
-                  {/* {chooseShelf.rating ? `${chooseShelf.rating}/5` : "—"} */}
-                  aggiungi rating
-                </td>
+                {toggleShelf === "read" && (
+                  <>
+                    <td className="px-4 py-2 text-sm text-gray-600">
+                      <RatingStars book={book} />
+                    </td>
+                    <td className="px-4 py-2 text-sm text-gray-600">
+                      {/* {book.notes || "—"} */}
+                      <input type="text" placeholder="inserisci note" />
+                    </td>
+                  </>
+                )}
 
                 <td className="px-4 py-2 text-sm text-gray-600">
-                  {chooseShelf.notes || "—"}
-                </td>
-                <td className="px-4 py-2 text-sm text-gray-600">
-                  <div onClick={() => remove(toggleShelf, chooseShelf.key)}>
+                  <div onClick={() => remove(toggleShelf, book.key)}>
                     <FontAwesomeIcon icon={faTrash} />
                   </div>
                 </td>

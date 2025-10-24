@@ -4,7 +4,7 @@ export type Book = {
   title: string;
   author: string;
   coverId: string;
-  firstPublishYear?: number;
+  personalRating?: number;
   notes?: string;
 };
 

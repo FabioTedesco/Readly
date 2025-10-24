@@ -10,6 +10,8 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  console.log(books);
+
   const handleSearch = async (q: string) => {
     if (!q.trim()) return;
     setLoading(true);
