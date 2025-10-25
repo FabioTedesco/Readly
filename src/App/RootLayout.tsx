@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { BooksProvider } from "@/context/BooksContext";
+
 const RootLayout = () => {
   return (
     <BooksProvider>

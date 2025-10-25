@@ -11,6 +11,8 @@ const Card = ({ book }: Props) => {
   const isRead = isInRead(book.key);
   const isWhishlist = isInWishlist(book.key);
 
+  console.log(isInWishlist(book.key));
+
   // Costruisci URL della copertina
   const coverUrl = book.coverId
     ? `https://covers.openlibrary.org/b/id/${book.coverId}-M.jpg`

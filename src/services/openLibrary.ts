@@ -10,7 +10,6 @@ type OLSearchDoc = {
   title: string;
   author_name?: string[];
   cover_i?: number;
-  first_publish_year?: number;
 };
 
 type OLSearchResponse = {
@@ -19,9 +18,13 @@ type OLSearchResponse = {
   start: number;
 };
 
-export const searchBook = async (q: string, page = 1): Promise<Book[]> => {
+export const searchBook = async (
+  q: string,
+  page = 1,
+  limit = 20
+): Promise<Book[]> => {
   const response = await api.get<OLSearchResponse>(`/search.json?`, {
-    params: { q, page },
+    params: { q, page, limit },
   });
 
   const books = response.data.docs.map((doc) => ({
@@ -29,7 +32,6 @@ export const searchBook = async (q: string, page = 1): Promise<Book[]> => {
     title: doc.title,
     author: doc.author_name?.[0] ?? "Unknown",
     coverId: doc.cover_i ? String(doc.cover_i) : "",
-    firstPublishYear: doc.first_publish_year,
   }));
 
   console.log(books);

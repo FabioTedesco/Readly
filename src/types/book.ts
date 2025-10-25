@@ -1,5 +1,5 @@
 export type Book = {
-  shelf: Shelf;
+  shelf?: Shelf;
   key: string;
   title: string;
   author: string;

@@ -24,6 +24,7 @@ type State = {
 
 type Action =
   | { type: "ADD"; shelf: Shelf; book: Book }
+  | { type: "MOVE"; book: Book }
   | { type: "SET_RATING"; personalRating: number; book: Book }
   | { type: "SET_NOTES"; notes: string; book: Book }
   | { type: "REMOVE"; shelf: Shelf; key: string }
@@ -38,6 +39,7 @@ type BooksContextValue = {
   //azioni
   add: (shelf: Shelf, book: Book) => void;
   remove: (shelf: Shelf, key: string) => void;
+  move: (book: Book) => void;
   handleToggle: (shelf: Shelf) => void;
   addRating: (personaRating: number, book: Book) => void;
   addNotes: (notes: string, book: Book) => void;
@@ -98,6 +100,22 @@ function reducer(state: State, action: Action): State {
           },
         },
       };
+    }
+
+    case "MOVE": {
+      const { book } = action;
+
+      if (!state.shelves["wishlist"][book.key]) return state;
+
+      const { [book.key]: _, ...rest } = state.shelves["wishlist"];
+
+      const shelves: ShelvesIndex = {
+        ...state.shelves,
+        wishlist: rest,
+        read: { ...state.shelves["read"], [book.key]: true },
+      };
+
+      return { ...state, shelves };
     }
 
     case "SET_NOTES": {
@@ -189,6 +207,9 @@ export function BooksProvider({ children }: { children: ReactNode }) {
   const remove = (shelf: Shelf, key: string) => {
     dispatch({ type: "REMOVE", shelf, key });
   };
+  const move = (book: Book) => {
+    dispatch({ type: "MOVE", book });
+  };
   const handleToggle = (shelf: Shelf) => {
     dispatch({ type: "TOGGLE", shelf });
   };
@@ -233,6 +254,7 @@ export function BooksProvider({ children }: { children: ReactNode }) {
     wishlist,
     toggleShelf,
     add,
+    move,
     addRating,
     addNotes,
     remove,
