@@ -86,6 +86,7 @@ export default function BookCard({
         <div className="flex flex-wrap items-center gap-2 text-[11px] text-gray-500">
           <StatusBadge isRead={isRead} />
         </div>
+        {}
         <button
           className="absolute bottom-3 right-4 hover:text-red-500 transition border-2 rounded-xl p-3 bg-indigo-300"
           onClick={onMove}
