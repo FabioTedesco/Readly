@@ -22,7 +22,11 @@ export const searchBook = async (
   q: string,
   page = 1,
   limit = 20
-): Promise<Book[]> => {
+): Promise<{
+  books: Book[];
+  page: number;
+  numFound: number;
+}> => {
   const response = await api.get<OLSearchResponse>(`/search.json?`, {
     params: { q, page, limit },
   });
@@ -36,5 +40,9 @@ export const searchBook = async (
 
   console.log(books);
 
-  return books;
+  return {
+    books,
+    page,
+    numFound: response.data.numFound,
+  };
 };
