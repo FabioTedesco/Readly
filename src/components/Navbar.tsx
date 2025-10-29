@@ -6,7 +6,9 @@ export const Navbar = () => {
   return (
     <nav className="flex items-center justify-between px-6 py-4 bg-indigo-600 text-white shadow-sm">
       {/* Logo / Brand */}
-      <div className="text-2xl font-semibold tracking-wide">Readly</div>
+      <div className="text-2xl font-semibold tracking-wide">
+        <Link to={"/"}>Readly</Link>
+      </div>
 
       {/* Right-side buttons */}
       <div className="flex items-center gap-4">
