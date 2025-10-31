@@ -10,7 +10,7 @@ type StarRatingProps = {
 
 export default function RatingStars({ max = 5, book }: StarRatingProps) {
   const { addRating } = useBooks();
-  console.log(book);
+  // console.log(book);
 
   const [hovered, setHovered] = useState<number | null>(null);
 

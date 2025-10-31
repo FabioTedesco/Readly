@@ -7,7 +7,7 @@ import LoginPage from "@/pages/LoginPage";
 
 export const router = createBrowserRouter([
   {
-    element: <RootLayout />, // Navbar/Footer qui dentro
+    element: <RootLayout />,
     children: [
       //rotta protetta
 
@@ -29,11 +29,10 @@ export const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-
-      {
-        path: "/login",
-        element: <LoginPage />,
-      },
     ],
+  },
+  {
+    path: "/login",
+    element: <LoginPage />,
   },
 ]);

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { Book } from "@/types/book";
-import BookList from "@/components/BookList";
+
+import Card from "./Card";
 
 type Props = {
   books: Book[];
@@ -66,8 +67,12 @@ export default function BookListWithInfiniteScroll({
   }
 
   return (
-    <div className="flex flex-col flex-1">
-      <BookList books={books} />
+    <div className="flex flex-col">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-10">
+        {books.map((book) => (
+          <Card key={book.key} book={book} />
+        ))}
+      </div>
 
       {isFetchingNextPage && (
         <div className="flex justify-center py-4 text-gray-500 text-sm">
@@ -75,7 +80,6 @@ export default function BookListWithInfiniteScroll({
         </div>
       )}
 
-      {/* sentinel per l'intersection observer */}
       <div ref={loadMoreRef} className="h-10" />
 
       {!hasNextPage && books.length > 0 && !isFetchingNextPage && (

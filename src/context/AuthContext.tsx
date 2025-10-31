@@ -99,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     //debug per vedere jwt token
     const { data } = await supabase.auth.getSession();
-    console.log(data.session?.access_token);
+    // console.log(data.session?.access_token);
     return {};
   };
 

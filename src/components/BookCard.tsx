@@ -18,7 +18,7 @@ export default function BookCard({
   onMove: () => void;
 }) {
   return (
-    <div className="relative flex flex-col md:flex-row gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow">
+    <div className="relative flex flex-col md:flex-row gap-4 rounded-xl border border-gray-200 bg-sidebar p-4 shadow-sm hover:shadow-md transition-shadow">
       {/* Pulsante rimuovi in alto a destra */}
       <button
         onClick={onRemove}
@@ -88,7 +88,7 @@ export default function BookCard({
         </div>
         {!isRead && (
           <button
-            className="absolute bottom-3 right-4 hover:text-red-500 transition border-2 rounded-xl p-3 bg-indigo-300"
+            className="absolute bottom-3 right-4 hover:opacity-80 transition border-2 rounded-xl p-3 bg-lime-400 cursor-pointer"
             onClick={onMove}
           >
             Sposta in MyShelf

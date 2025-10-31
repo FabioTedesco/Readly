@@ -24,20 +24,31 @@ export default function SearchBar({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex w-full max-w-xl mx-auto gap-2"
       role="search"
       aria-label="Search books"
+      className="mx-auto flex w-full max-w-2xl items-center gap-2"
     >
       <input
-        className="flex-1 border rounded-lg px-3 py-2"
-        placeholder="Cerca titolo, autore, ISBN…"
-        value={q}
         ref={inputRef}
+        value={q}
         onChange={(e) => setQ(e.target.value)}
+        placeholder="Cerca titolo, autore, ISBN…"
+        className="
+          h-11 w-full rounded-xl border border-border bg-card px-3
+          text-base text-foreground placeholder:text-muted-foreground/70
+          shadow-sm outline-none transition
+          focus:border-primary/50 focus:ring-2 focus:ring-primary/40
+        "
       />
       <button
         type="submit"
-        className="px-4 py-2 rounded-lg bg-indigo-600 text-white"
+        className="
+          inline-flex h-11 items-center justify-center rounded-xl
+          bg-primary px-4 text-sm font-medium text-white shadow-sm
+          transition hover:opacity-90
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40
+          disabled:opacity-50 cursor-pointer
+        "
       >
         Search
       </button>

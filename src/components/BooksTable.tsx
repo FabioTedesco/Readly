@@ -8,7 +8,7 @@ export default function BooksList() {
   const books = toggleShelf === "read" ? read : wishlist;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mx-10 my-5">
       {books.length === 0 ? (
         <div className="text-center text-gray-400 italic py-8 border border-dashed rounded-xl">
           No books here yet 📚

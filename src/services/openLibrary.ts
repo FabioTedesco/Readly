@@ -38,7 +38,7 @@ export const searchBook = async (
     coverId: doc.cover_i ? String(doc.cover_i) : "",
   }));
 
-  console.log(books);
+  // console.log(books);
 
   return {
     books,
