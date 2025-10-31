@@ -5,6 +5,8 @@ import type { Book } from "@/types/book";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import BookListWithInfiniteScroll from "@/components/BookListWithInfiniteScroll";
 import BackToTop from "@/components/BackToTop";
+import BooksSkeleton from "@/components/BooksSkeleton";
+import ErrorMessage from "@/components/ErrorMessage";
 
 const PAGE_SIZE = 20;
 
@@ -58,7 +60,7 @@ export default function Home() {
       <main className="min-h-screen bg-background text-foreground">
         <div className="mx-auto max-w-6xl px-4 py-8">
           <SearchBar onSearch={handleSearch} />
-          <p className="mt-6 text-sm text-muted-foreground">Caricamento…</p>
+          <BooksSkeleton />
         </div>
       </main>
     );
@@ -69,14 +71,8 @@ export default function Home() {
       <main className="min-h-screen bg-background text-foreground">
         <div className="mx-auto max-w-6xl px-4 py-8">
           <SearchBar onSearch={handleSearch} />
-          <div className="mt-6 rounded-xl border border-border bg-card p-4 shadow-sm">
-            <p className="text-destructive">Errore: {error.message}</p>
-            <button
-              onClick={() => refetch()}
-              className="mt-3 inline-flex items-center justify-center rounded-lg bg-primary px-3 py-2 text-white transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-            >
-              Riprova
-            </button>
+          <div className="mt-8">
+            <ErrorMessage message={error.message} onRetry={() => refetch()} />
           </div>
         </div>
       </main>
