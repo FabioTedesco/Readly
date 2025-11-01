@@ -116,6 +116,12 @@ const LoginPage = () => {
               </button>
             </>
           )}
+          <button
+            className="text-primary hover:underline cursor-pointer"
+            onClick={() => setMode("signup")}
+          >
+            Password dimenticata? Recupera
+          </button>
         </div>
       </div>
     </main>

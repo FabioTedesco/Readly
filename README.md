@@ -3,7 +3,8 @@
 Un'app moderna per **cercare libri online**, salvarli nella tua libreria personale (**MyBooks**) o aggiungerli alla **Wishlist**.  
 Readly combina un design minimalista con un backend semplice e sicuro basato su **Supabase**.
 
-![Readly Screenshot](./public/screenshot.png) <!-- opzionale, se vuoi aggiungere un'immagine -->
+![Readly Screenshot](./src//assets/readly-homepage.png)
+![Readly Screenshot](./src//assets/readly-MyBooks.png) <!-- opzionale, se vuoi aggiungere un'immagine -->
 
 ---
 
