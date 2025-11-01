@@ -22,7 +22,7 @@ export default function BookCard({
       {/* Pulsante rimuovi in alto a destra */}
       <button
         onClick={onRemove}
-        className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition"
+        className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition cursor-pointer"
         aria-label="Remove book"
       >
         <FontAwesomeIcon icon={faTrash} />

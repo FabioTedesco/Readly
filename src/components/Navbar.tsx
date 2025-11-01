@@ -1,6 +1,6 @@
 import { useAuth } from "@/context/AuthContext";
 import { Link } from "react-router-dom";
-
+import logo from "../assets/logo.png";
 export const Navbar = () => {
   const { logout } = useAuth();
 
@@ -9,7 +9,7 @@ export const Navbar = () => {
       {/* Logo + Links */}
       <div>
         <h1 className="text-4xl font-bold mb-10">
-          <Link to="/">Readly</Link>
+          <img src={logo} alt="Readly logo" />
         </h1>
 
         <Link to="/">
