@@ -88,7 +88,7 @@ export default function BookCard({
         </div>
         {!isRead && (
           <button
-            className="sm:bsolute sm:bottom-3 right-4 hover:opacity-80 transition border-2 rounded-xl p-3 bg-lime-400 cursor-pointer"
+            className="sm:absolute sm:bottom-3 right-4 hover:opacity-80 transition border-2 rounded-xl p-3 bg-lime-400 cursor-pointer"
             onClick={onMove}
           >
             Sposta in MyShelf

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { Book } from "@/types/book";
+import { fetchDetails } from "@/services/openLibrary";
 
 import Card from "./Card";
 
@@ -48,6 +49,7 @@ export default function BookListWithInfiniteScroll({
     };
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  // console.log(books);
   // Caso: nessuna ricerca ancora fatta
   if (!queryActive) {
     return (

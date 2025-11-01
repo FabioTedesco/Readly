@@ -9,3 +9,10 @@ export type Book = {
 };
 
 export type Shelf = "Read" | "WishList";
+
+export type BookDetails = {
+  title: string;
+  author: string;
+  key: string;
+  description?: string;
+};

@@ -1,5 +1,8 @@
 import { useBooks } from "@/context/BooksContext";
-import type { Book } from "@/types/book";
+import { fetchDetails } from "@/services/openLibrary";
+import { type BookDetails, type Book } from "@/types/book";
+import { useState } from "react";
+import BookDetailsModal from "./BookDetailsModal";
 
 type Props = {
   book: Book;
@@ -7,21 +10,36 @@ type Props = {
 
 const Card = ({ book }: Props) => {
   const { add, isInRead, isInWishlist } = useBooks();
+  const [bookDetails, setBookDetails] = useState<BookDetails | null>(null);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const isRead = isInRead(book.key);
   const isWhishlist = isInWishlist(book.key);
 
-  // console.log(isInWishlist(book.key));
-
-  // Costruisci URL della copertina
   const coverUrl = book.coverId
     ? `https://covers.openlibrary.org/b/id/${book.coverId}-M.jpg`
     : "https://cdn.pixabay.com/photo/2020/04/26/17/45/books-5096427_1280.jpg";
 
-  // console.log(coverUrl);
+  const handleOpen = async (id: string) => {
+    setIsLoading(true);
+    try {
+      const bookId = id.replace("/works/", "");
+      const response = await fetchDetails(bookId);
+      setBookDetails(response);
+      setIsOpen(true);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className="bg-card rounded-xl border-2 shadow border-border hover:shadow-lg transition flex flex-col justify-between">
+    <div
+      className="bg-card rounded-xl border-2 shadow border-border hover:shadow-lg transition flex flex-col justify-between"
+      onClick={() => handleOpen(book.key)}
+    >
       {/* Copertina */}
       <div className="flex justify-center py-2 bg-gray-200">
         <img src={coverUrl} alt={book.title} className="w-36 h-44 rounded-md" />
@@ -64,6 +82,15 @@ const Card = ({ book }: Props) => {
           </button>
         </div>
       )}
+      <BookDetailsModal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        bookDetails={bookDetails}
+        cover={coverUrl}
+        isRead={isRead}
+        isWishlist={isWhishlist}
+        book={book}
+      />
     </div>
   );
 };
