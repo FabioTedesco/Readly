@@ -28,9 +28,6 @@ L’interfaccia è responsive, pulita e ottimizzata per la leggibilità.
 ✅ **Gestione errori** con messaggi chiari
 
 📅 **Prossime implementazioni**
-
-- 📖 Card con dettagli del libro
-- 🔑 Recupero password
 - 👤 Sezione profilo utente
 
 ---
