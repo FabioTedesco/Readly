@@ -18,7 +18,13 @@ const ForgotPassword = ({ setForgotPassword }: Props) => {
 
   return (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-[2px] flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-8 w-full max-w-md relative">
+      <div
+        className="bg-white rounded-lg p-8 w-full max-w-md relative"
+        onClick={(e) => {
+          e.stopPropagation();
+          setForgotPassword(false);
+        }}
+      >
         <form className="flex space-x-2" onSubmit={handleOnSubmit}>
           <input
             placeholder="Inserisci la tua email"
