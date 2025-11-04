@@ -8,6 +8,8 @@ Readly combina un design minimalista con un backend semplice e sicuro basato su 
   <img src="./src/assets/readly-MyBooks.png" alt="Readly MyBooks" width="49%" />
 </div>
 
+[Readly](https://readly-demo.vercel.app/)
+
 ---
 
 ## 🧠 Descrizione

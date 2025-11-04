@@ -4,6 +4,7 @@ import MyBooks from "@/pages/MyBooks";
 import RootLayout from "./RootLayout";
 import ProtectedRoute from "@/components/ProtectedRoutes";
 import LoginPage from "@/pages/LoginPage";
+import ResetPassword from "@/pages/ResetPassword";
 
 export const router = createBrowserRouter([
   {
@@ -34,5 +35,9 @@ export const router = createBrowserRouter([
   {
     path: "/login",
     element: <LoginPage />,
+  },
+  {
+    path: "/reset-password",
+    element: <ResetPassword />,
   },
 ]);

@@ -1,14 +1,17 @@
+import ForgotPassword from "@/components/ForgotPassword";
 import { useAuth } from "@/context/AuthContext";
 import { useState, type FormEvent } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
+  const navigate = useNavigate();
   const { login, signup, user, loading } = useAuth();
 
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errMsg, setErrorMsg] = useState("");
+  const [forgotPassword, setForgotPassword] = useState(false);
 
   if (loading) {
     return (
@@ -116,14 +119,22 @@ const LoginPage = () => {
               </button>
             </>
           )}
-          <button
-            className="text-primary hover:underline cursor-pointer"
-            onClick={() => setMode("signup")}
-          >
-            Password dimenticata? Recupera
-          </button>
+          <>
+            <div className="flex justify-center">
+              <p> Password dimenticata? </p>
+              <button
+                className="text-primary  hover:underline cursor-pointer"
+                onClick={() => setForgotPassword(true)}
+              >
+                Recupera
+              </button>
+            </div>
+          </>
         </div>
       </div>
+      {forgotPassword && (
+        <ForgotPassword setForgotPassword={setForgotPassword} />
+      )}
     </main>
   );
 };

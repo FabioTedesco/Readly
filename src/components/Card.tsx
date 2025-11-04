@@ -37,7 +37,7 @@ const Card = ({ book }: Props) => {
 
   return (
     <div
-      className="bg-card rounded-xl border-2 shadow border-border hover:shadow-lg transition flex flex-col justify-between"
+      className="bg-card rounded-xl border-2 shadow border-border hover:shadow-lg transition flex flex-col justify-between cursor-pointer"
       onClick={() => handleOpen(book.key)}
     >
       {/* Copertina */}

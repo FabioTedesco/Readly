@@ -16,6 +16,7 @@ type AuthContextType = {
   loading: boolean;
   signup: (email: string, password: string) => Promise<{ error?: string }>;
   login: (email: string, password: string) => Promise<{ error?: string }>;
+  resetPassword: (email: string) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
 };
 
@@ -80,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password,
     });
+
     if (error) {
       console.error("signup error:", error);
       return { error: error.message };
@@ -97,10 +99,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error("login error:", error);
       return { error: error.message };
     }
-    //debug per vedere jwt token
-    const { data } = await supabase.auth.getSession();
-    // console.log(data.session?.access_token);
+
     return {};
+  };
+
+  //funzione resetPassword
+  const resetPassword = async (email: string) => {
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+    if (error) {
+      console.error("error", error);
+    }
+
+    return { error: error?.message };
   };
 
   // funzione logout
@@ -115,6 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         signup,
         login,
+        resetPassword,
         logout,
       }}
     >
