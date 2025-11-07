@@ -36,22 +36,25 @@ const Card = ({ book }: Props) => {
   };
 
   return (
-    <div
-      className="bg-card rounded-xl border-2 shadow border-border hover:shadow-lg transition flex flex-col justify-between cursor-pointer"
-      onClick={() => handleOpen(book.key)}
-    >
-      {/* Copertina */}
-      <div className="flex justify-center py-2 bg-gray-200">
-        <img src={coverUrl} alt={book.title} className="w-36 h-44 rounded-md" />
-      </div>
-      {/* Testo */}
-      <div className="mt-3 flex-1 text-center">
-        <h3 className="text-md font-semibold text-gray-800 line-clamp-2">
-          {book.title}
-        </h3>
-        <p className="text-sm text-gray-500 mt-1">
-          {book.author || "Unknown Author"}
-        </p>
+    <div className="bg-card rounded-xl border-2 shadow border-border hover:shadow-lg transition flex flex-col justify-between cursor-pointer">
+      <div onClick={() => handleOpen(book.key)}>
+        {/* Copertina */}
+        <div className="flex justify-center py-2 bg-gray-200">
+          <img
+            src={coverUrl}
+            alt={book.title}
+            className="w-36 h-44 rounded-md"
+          />
+        </div>
+        {/* Testo */}
+        <div className="mt-3 flex-1 text-center">
+          <h3 className="text-md font-semibold text-gray-800 line-clamp-2">
+            {book.title}
+          </h3>
+          <p className="text-sm text-gray-500 mt-1">
+            {book.author || "Unknown Author"}
+          </p>
+        </div>
       </div>
       {/* Pulsanti */}
       {isRead ? (
@@ -67,7 +70,7 @@ const Card = ({ book }: Props) => {
           </p>
         </div>
       ) : (
-        <div className="p-4">
+        <div className="p-4 z-50">
           <button
             onClick={() => add("wishlist", book)}
             className="w-full p-1.5 border-2 border-border hover:bg-border rounded-sm font-medium transition cursor-pointer mb-2"
