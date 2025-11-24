@@ -8,6 +8,8 @@ import {
   type ReactNode,
   useReducer,
 } from "react";
+import { useAuth } from "./AuthContext";
+import { supabase } from "@/services/supabaseClient";
 
 type Shelf = "read" | "wishlist";
 
@@ -23,6 +25,7 @@ type State = {
 };
 
 type Action =
+  | { type: "HYDRATE"; state: State }
   | { type: "ADD"; shelf: Shelf; book: Book }
   | { type: "MOVE"; book: Book }
   | { type: "SET_RATING"; personalRating: number; book: Book }
@@ -50,7 +53,15 @@ type BooksContextValue = {
   reset: () => void;
 };
 
-const STORAGE_KEY = "readly-state-v1";
+type UserBookRow = {
+  id: string;
+  user_id: string;
+  book_key: string;
+  shelf: Shelf;
+  book_data: Book;
+  personal_rating: number | null;
+  notes: string | null;
+};
 
 type PersistedState = {
   booksByKey: Record<string, Book>;
@@ -68,6 +79,10 @@ const initState: State = {
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
+    case "HYDRATE": {
+      return action.state;
+    }
+
     case "ADD": {
       const { shelf, book } = action;
 
@@ -168,68 +183,151 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-function initFromStorage(): State {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return initState;
-
-    const persisted = JSON.parse(raw) as PersistedState;
-
-    return {
-      booksByKey: persisted.booksByKey ?? {},
-      shelves: persisted.shelves ?? { wishlist: {}, read: {} },
-      toggleShelf: persisted.toggleShelf ?? "read",
-    };
-  } catch (error) {
-    console.error(error);
-    return initState;
-  }
-}
-
 const BooksContext = createContext<BooksContextValue | undefined>(undefined);
 
 export function BooksProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(
-    reducer,
-    undefined as unknown as State,
-    initFromStorage
-  );
+  const [state, dispatch] = useReducer(reducer, initState);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const userId = user?.id ?? null;
 
-  const add = (shelf: Shelf, book: Book) => {
+  useEffect(() => {
+    if (!userId) return;
+
+    const load = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("user_books")
+        .select("*")
+        .eq("user_id", userId);
+
+      if (error) {
+        console.error(error);
+        setLoading(false);
+        return;
+      }
+
+      const booksByKey: Record<string, Book> = {};
+      const shelves: ShelvesIndex = { read: {}, wishlist: {} };
+      const rows = (data ?? []) as UserBookRow[];
+
+      rows.forEach((row) => {
+        const book: Book = {
+          ...row.book_data,
+          personalRating: row.personal_rating ?? row.book_data.personalRating,
+          notes: row.notes ?? row.book_data.notes,
+        };
+
+        booksByKey[row.book_key] = book;
+
+        if (row.shelf === "read" || row.shelf === "wishlist") {
+          shelves[row.shelf][row.book_key] = true;
+        }
+      });
+
+      dispatch({
+        type: "HYDRATE",
+        state: {
+          booksByKey,
+          shelves,
+          toggleShelf: "read",
+        },
+      });
+
+      setLoading(false);
+    };
+
+    load();
+  }, [userId]);
+
+  const add = async (shelf: Shelf, book: Book) => {
     dispatch({ type: "ADD", shelf, book });
+
+    if (!userId) return;
+
+    const { error } = await supabase.from("user_books").upsert(
+      {
+        user_id: userId,
+        book_key: book.key,
+        shelf,
+        book_data: book,
+        personal_rating: book.personalRating ?? null,
+        notes: book.notes ?? null,
+      },
+      { onConflict: "user_id,book_key" }
+    );
+
+    if (error) {
+      console.error("Errore supabase ADD", error);
+    }
   };
-  const addRating = (personalRating: number, book: Book) => {
+
+  const addRating = async (personalRating: number, book: Book) => {
     dispatch({ type: "SET_RATING", personalRating, book });
+
+    if (!userId) return;
+
+    const { error } = await supabase
+      .from("user_books")
+      .update({ personal_rating: personalRating })
+      .eq("user_id", userId)
+      .eq("book_key", book.key);
+
+    if (error) console.error("Errore supabase SET_RATING", error);
   };
-  const addNotes = (notes: string, book: Book) => {
+
+  const addNotes = async (notes: string, book: Book) => {
     dispatch({ type: "SET_NOTES", notes, book });
+
+    if (!userId) return;
+
+    const { error } = await supabase
+      .from("user_books")
+      .update({ notes })
+      .eq("user_id", userId)
+      .eq("book_key", book.key);
+
+    if (error) console.error("Errore supabase SET_NOTES", error);
   };
-  const remove = (shelf: Shelf, key: string) => {
+
+  const remove = async (shelf: Shelf, key: string) => {
     dispatch({ type: "REMOVE", shelf, key });
+
+    if (!userId) return;
+
+    const { error } = await supabase
+      .from("user_books")
+      .delete()
+      .eq("user_id", userId)
+      .eq("book_key", key);
+
+    if (error) console.error("Errore supabase REMOVE", error);
   };
-  const move = (book: Book) => {
+
+  const move = async (book: Book) => {
     dispatch({ type: "MOVE", book });
+
+    if (!userId) return;
+
+    const { error } = await supabase
+      .from("user_books")
+      .update({ shelf: "read" })
+      .eq("user_id", userId)
+      .eq("book_key", book.key);
+
+    if (error) console.error("Errore supabase MOVE", error);
   };
+
   const handleToggle = (shelf: Shelf) => {
     dispatch({ type: "TOGGLE", shelf });
   };
   const reset = () => {
-    localStorage.removeItem(STORAGE_KEY);
     dispatch({ type: "RESET" });
   };
 
   const isInShelf = (shelf: Shelf, key: string) => !!state.shelves[shelf][key];
   const isInRead = (key: string) => isInShelf("read", key);
   const isInWishlist = (key: string) => isInShelf("wishlist", key);
-
-  useEffect(() => {
-    const snapshot: PersistedState = {
-      booksByKey: state.booksByKey,
-      shelves: state.shelves,
-      toggleShelf: state.toggleShelf,
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
-  }, [state.booksByKey, state.shelves, state.toggleShelf]);
 
   //trasforma oggetti in array per mostrarli:
   const read = useMemo(
