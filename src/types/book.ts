@@ -8,7 +8,7 @@ export type Book = {
   notes?: string;
 };
 
-export type Shelf = "Read" | "WishList";
+export type Shelf = "read" | "wishlist";
 
 export type BookDetails = {
   title: string;

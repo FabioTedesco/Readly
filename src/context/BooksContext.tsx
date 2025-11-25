@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useAuth } from "./AuthContext";
 import { supabase } from "@/services/supabaseClient";
+import { upsertUserBook, addPersonalRating } from "@/services/booksService";
 
 type Shelf = "read" | "wishlist";
 
@@ -245,20 +246,10 @@ export function BooksProvider({ children }: { children: ReactNode }) {
 
     if (!userId) return;
 
-    const { error } = await supabase.from("user_books").upsert(
-      {
-        user_id: userId,
-        book_key: book.key,
-        shelf,
-        book_data: book,
-        personal_rating: book.personalRating ?? null,
-        notes: book.notes ?? null,
-      },
-      { onConflict: "user_id,book_key" }
-    );
-
-    if (error) {
-      console.error("Errore supabase ADD", error);
+    try {
+      upsertUserBook(userId, shelf, book);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -267,27 +258,17 @@ export function BooksProvider({ children }: { children: ReactNode }) {
 
     if (!userId) return;
 
-    const { error } = await supabase
-      .from("user_books")
-      .update({ personal_rating: personalRating })
-      .eq("user_id", userId)
-      .eq("book_key", book.key);
-
-    if (error) console.error("Errore supabase SET_RATING", error);
+    try {
+      addPersonalRating(userId, personalRating, book);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const addNotes = async (notes: string, book: Book) => {
     dispatch({ type: "SET_NOTES", notes, book });
 
     if (!userId) return;
-
-    const { error } = await supabase
-      .from("user_books")
-      .update({ notes })
-      .eq("user_id", userId)
-      .eq("book_key", book.key);
-
-    if (error) console.error("Errore supabase SET_NOTES", error);
   };
 
   const remove = async (shelf: Shelf, key: string) => {
